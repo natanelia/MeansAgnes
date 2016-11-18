@@ -9,11 +9,8 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-import weka.classifiers.bayes.NaiveBayes;
-import weka.classifiers.trees.Id3;
-import weka.classifiers.trees.J48;
+import weka.clusterers.ClusterEvaluation;
+import weka.clusterers.Clusterer;
 import weka.core.Instances;
 import weka.core.SerializationHelper;
 import weka.core.converters.ConverterUtils;
@@ -27,17 +24,17 @@ import weka.filters.unsupervised.attribute.Remove;
  */
 public class MeansAgnes {
     private Instances data;
-    private Classifier model;
-    private int classifier;
+    private Clusterer model;
+    private int clusterer;
     
     public MeansAgnes(){
         data = null;
         model = null;
-        classifier = 0;
+        clusterer = 0;
     }
     
     public void setClassifier(int i){
-        classifier = i;
+        clusterer = i;
     }
     
     //load data (arrf dan csv)
@@ -89,7 +86,7 @@ public class MeansAgnes {
         }
     }
     
-    public void buildClassifier(int type, Instances train){
+    public void buildClusterer(int type, Instances train){
         //Classifier model = null;
         switch (type) {
             case 0:
@@ -101,7 +98,7 @@ public class MeansAgnes {
                 break;
         }
         try {
-            model.buildClassifier(train);
+            model.buildClusterer(train);
             System.out.println(model.toString());
             //return model;
         } catch (Exception ex) {
@@ -109,26 +106,10 @@ public class MeansAgnes {
         }
     }
 
-    //10-fold cross validation
-    public void crossValidation(){
-        try {
-            buildClassifier(classifier, data);
-            Classifier m = model;
-            Evaluation eval = new Evaluation(data);
-            eval.crossValidateModel(m, data, 10, new Random(1));
-            System.out.println("10 FOLD CROSS VALIDATION\n\n");
-            System.out.println(eval.toSummaryString("\n=== Summary ===\n", false));
-            System.out.println(eval.toClassDetailsString("=== Detailed Accuracy By Class ===\n"));
-            System.out.println(eval.toMatrixString("=== Confusion Matrix ===\n"));
-        } catch (Exception ex) {
-            System.out.println("10-Fold Cross Validation gagal");
-        }
-    }
     
-    //percentage split
+    // percentage split
     public void percentageSplit(double percent){
         try {
-            //Classifier model =null;
             data.randomize(new java.util.Random(0));
             int trainSize = (int) Math.round((double) data.numInstances() * percent/100f);
             int testSize = data.numInstances() - trainSize;
@@ -136,26 +117,15 @@ public class MeansAgnes {
             Instances train = new Instances(data, 0, trainSize);
             Instances test = new Instances(data, trainSize, testSize);
             
-            /*for(int i=0; i<trainSize; i++){
-                train.add(data.instance(i));
-            }
-            for(int i=trainSize; i<data.numInstances(); i++){
-                test.add(data.instance(i));
-            }*/
-            buildClassifier(classifier, train);
-            Classifier m = model;
-            //tree.buildClassifier(train);
-            //Classifier model = tree;
-            //model.buildClassifier(train);
-                    
-            Evaluation eval = new Evaluation(train);
-            eval.evaluateModel(m, test);
+            buildClusterer(clusterer, train);
+            Clusterer m = model;
+                   
+            ClusterEvaluation eval = new ClusterEvaluation();
+            eval.setClusterer(m);
+            eval.evaluateClusterer(test);
             System.out.println("PERCENTAGE SPLIT\n\n");
             
-            System.out.println(eval.toClassDetailsString("=== Detailed Accuracy By Class ===\n"));
-            System.out.println(eval.toMatrixString("=== Confusion Matrix ===\n"));
-            System.out.println(eval.toSummaryString("\n=== Summary ===\n", false));
-            
+            System.out.println(m.toString());
         } catch (Exception ex) {
             System.out.println("Gagal");
         }
@@ -172,10 +142,10 @@ public class MeansAgnes {
     }
  
     //Load Model
-    public Classifier loadModel(String modeladdress){
-        Classifier model = null;
+    public Clusterer loadModel(String modeladdress){
+        Clusterer model = null;
         try {
-            model  = (Classifier) SerializationHelper.read(modeladdress);
+            model = (Clusterer) SerializationHelper.read(modeladdress);
             System.out.println(model.toString());
             System.out.println("Berhasil Load Model\n");
         } catch (Exception ex) {
@@ -186,14 +156,14 @@ public class MeansAgnes {
     
     public void classify(String data_address){
         try {
-            buildClassifier(classifier, data);
-            Classifier m = model;
+            buildClusterer(clusterer, data);
+            Clusterer m = model;
             Instances test = ConverterUtils.DataSource.read(data_address);
             System.out.println(test.toString());
             test.setClassIndex(test.numAttributes()-1);
             System.out.println("#Predictions on user test set#");
             for (int i = 0; i < test.numInstances(); i++) {
-                double label = m.classifyInstance(test.instance(i));
+                double label = m.clusterInstance(test.instance(i));
                 test.instance(i).setClassValue(label);
                 System.out.println(test.instance(i)+"\n");
                 
@@ -208,11 +178,11 @@ public class MeansAgnes {
      */
     public static void main(String[] args) {
         String file = "";
-        int classifier;
+        int clusterer;
         String testfile = "";
         MeansAgnes w = new MeansAgnes();
         Scanner scan = new Scanner(System.in);
-        Classifier model = null;
+        Clusterer model = null;
         boolean stat = true;
         while(stat){
             System.out.println("\n\nProgram Eksplorasi Weka");
@@ -220,12 +190,11 @@ public class MeansAgnes {
             System.out.println("2. Filter : Resample");
             System.out.println("3. Remove Attribute");
             System.out.println("4. Build Classifier");
-            System.out.println("5. 10 Fold Cross Validation");
-            System.out.println("6. Percentage Split");
-            System.out.println("7. Save model");
-            System.out.println("8. Load model");
-            System.out.println("9. Prediction");
-            System.out.println("10. Exit");
+            System.out.println("5. Percentage Split");
+            System.out.println("6. Save model");
+            System.out.println("7. Load model");
+            System.out.println("8. Prediction");
+            System.out.println("9. Exit");
             System.out.print("Pilih Menu : "); 
             int option = scan.nextInt();
             if(option == 1) {
@@ -280,34 +249,14 @@ public class MeansAgnes {
                 System.out.println("1. Agnes");
                 System.out.println("2. K-Means");
                 System.out.print("Masukan pilihan : ");
-                classifier = scan.nextInt();
-                w.setClassifier(classifier - 1);
-                //w.buildClassifier(pil-1);
-                /*
-                if(pil == 1){
-                    model = w.buildClassifier(pil)
-                }
-                else if(pil == 2){
-                    model = w.id3Classifier();
-                }
-                else if(pil == 3){
-                    model = w.C45();
-                }
-                else if(pil == 4){
-                    //belom di implementasi
-                }else{
-                    System.out.println("Maaf pilihan tidak tersedia");
-                }*/
+                clusterer = scan.nextInt();
+                w.setClassifier(clusterer - 1);
             }else if(option == 5) {
-                //10-fold cross validation
-                //w.tenFoldCrossValidation();
-                w.crossValidation();
-            }else if(option == 6) {
                 System.out.print("Masukan nilai percentage split : ");
                 double p = scan.nextDouble();
                 w.percentageSplit(p);
                 //w.percentageSplit(model, p);
-            }else if(option == 7) {
+            }else if(option == 6) {
                 System.out.println("Ingin menyimpan model? (Y/N)");
                 String savemodel = scan.next();
                 if(savemodel.equalsIgnoreCase("Y")){
@@ -316,12 +265,12 @@ public class MeansAgnes {
                     modelname = "model/" + modelname + ".model";
                     w.saveModel(modelname);  
                 }
-            }else if(option == 8) {
+            }else if(option == 7) {
                 System.out.print("Nama file yang akan di Load: ");
                 String loadmodel = scan.next();
                 loadmodel = "model/"+loadmodel;
                 model = w.loadModel(loadmodel);
-            }else if(option == 9) {
+            }else if(option == 8) {
                 System.out.println("PREDICTION");
                 w.classify(testfile);
             }else {
