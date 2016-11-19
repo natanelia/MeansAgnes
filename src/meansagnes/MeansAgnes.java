@@ -33,7 +33,7 @@ public class MeansAgnes {
         clusterer = 0;
     }
     
-    public void setClassifier(int i){
+    public void setClusterer(int i){
         clusterer = i;
     }
     
@@ -93,6 +93,7 @@ public class MeansAgnes {
                 model = new MyAgnes();
                 break;
             case 1 :
+                model = new MyKMeans();
                 break;
             default:
                 break;
@@ -250,7 +251,7 @@ public class MeansAgnes {
                 System.out.println("2. K-Means");
                 System.out.print("Masukan pilihan : ");
                 clusterer = scan.nextInt();
-                w.setClassifier(clusterer - 1);
+                w.setClusterer(clusterer - 1);
             }else if(option == 5) {
                 System.out.print("Masukan nilai percentage split : ");
                 double p = scan.nextDouble();
