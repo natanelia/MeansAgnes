@@ -100,7 +100,7 @@ public class MeansAgnes {
         }
         try {
             model.buildClusterer(train);
-            System.out.println(model.toString());
+//            System.out.println(model.toString());
             //return model;
         } catch (Exception ex) {
             Logger.getLogger(MeansAgnes.class.getName()).log(Level.SEVERE, null, ex);
@@ -119,16 +119,13 @@ public class MeansAgnes {
             Instances test = new Instances(data, trainSize, testSize);
             
             buildClusterer(clusterer, train);
-            Clusterer m = model;
-                   
+
             ClusterEvaluation eval = new ClusterEvaluation();
-            eval.setClusterer(m);
+            eval.setClusterer(model);
             eval.evaluateClusterer(test);
-            System.out.println("PERCENTAGE SPLIT\n\n");
-            
-            System.out.println(m.toString());
+            System.out.println(eval.clusterResultsToString());
         } catch (Exception ex) {
-            System.out.println("Gagal");
+            System.out.println(ex);
         }
     }
     
@@ -153,25 +150,6 @@ public class MeansAgnes {
             System.out.println("tidak bisa diload\n");
         }
         return model;
-    }
-    
-    public void classify(String data_address){
-        try {
-            buildClusterer(clusterer, data);
-            Clusterer m = model;
-            Instances test = ConverterUtils.DataSource.read(data_address);
-            System.out.println(test.toString());
-            test.setClassIndex(test.numAttributes()-1);
-            System.out.println("#Predictions on user test set#");
-            for (int i = 0; i < test.numInstances(); i++) {
-                double label = m.clusterInstance(test.instance(i));
-                test.instance(i).setClassValue(label);
-                System.out.println(test.instance(i)+"\n");
-                
-            }
-        } catch (Exception ex) {
-            System.out.println("GAGAL PREDIKSI\n");
-        }
     }
    
     /**
@@ -273,7 +251,7 @@ public class MeansAgnes {
                 model = w.loadModel(loadmodel);
             }else if(option == 8) {
                 System.out.println("PREDICTION");
-                w.classify(testfile);
+                w.loadFile(testfile);
             }else {
                 stat = false;
                 System.out.println("====TERIMAKASIH :D====");

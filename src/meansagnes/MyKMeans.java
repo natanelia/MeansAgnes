@@ -28,12 +28,14 @@ public class MyKMeans extends RandomizableClusterer {
     private ReplaceMissingValues replaceMissingFilter;
 
     private int numCluster = 2;
+    private Instances instances;
     private Instances clusterCentroids;
     private int[] clusterAssignments;
     private Instances[] clusteredInstances;
 
     private int maxIterations = 500;
     private int currentIteration = 0;
+    private int[] clusterSizes;
     protected DistanceFunction distanceFunction = new EuclideanDistance();
 
     public MyKMeans() {
@@ -47,7 +49,7 @@ public class MyKMeans extends RandomizableClusterer {
     public void buildClusterer(Instances data) throws Exception {
         currentIteration = 0;
         replaceMissingFilter = new ReplaceMissingValues();
-        Instances instances = new Instances(data);
+        instances = new Instances(data);
 
         instances.setClassIndex(-1);
         replaceMissingFilter.setInputFormat(instances);
@@ -104,7 +106,7 @@ public class MyKMeans extends RandomizableClusterer {
                     }
                 }
             }
-            
+
             for (int i = 0; i < numCluster; i++) {
                 System.out.println(clusterCentroids.instance(i));
             }
@@ -130,7 +132,7 @@ public class MyKMeans extends RandomizableClusterer {
                 newCentroids.add(moveCentroid(clusteredInstances[i]));
             }
             clusterCentroids = newCentroids;
-            
+
             boolean centroidChanged = false;
             for (int i = 0; i < numCluster; i++) {
                 if (distanceFunction.distance(prevCentroids.instance(i), clusterCentroids.instance(i)) > 0) {
@@ -142,6 +144,13 @@ public class MyKMeans extends RandomizableClusterer {
             }
             System.out.println("\n\n");
         }
+
+        clusterSizes = new int[numCluster];
+        for (int i = 0; i < numCluster; i++) {
+            clusterSizes[i] = clusteredInstances[i].numInstances();
+        }
+
+        distanceFunction.clean();
     }
 
     protected Instance moveCentroid(Instances instances) {
@@ -154,7 +163,47 @@ public class MyKMeans extends RandomizableClusterer {
 
     @Override
     public int numberOfClusters() throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return numCluster;
+    }
+
+    /**
+     * clusters an instance that has been through the filters
+     *
+     * @param instance the instance to assign a cluster to
+     * @return a cluster number
+     */
+    private int clusterProcessedInstance(Instance instance) {
+        double minDist = Integer.MAX_VALUE;
+        int bestCluster = 0;
+        for (int i = 0; i < numCluster; i++) {
+            double dist = distanceFunction.distance(instance,
+                    clusterCentroids.instance(i));
+            if (dist < minDist) {
+                minDist = dist;
+                bestCluster = i;
+            }
+        }
+        return bestCluster;
+    }
+
+    /**
+     * Classifies a given instance.
+     *
+     * @param instance the instance to be assigned to a cluster
+     * @return the number of the assigned cluster as an interger if the class is
+     * enumerated, otherwise the predicted value
+     * @throws Exception if instance could not be classified successfully
+     */
+    @Override
+    public int clusterInstance(Instance instance) throws Exception {
+//        Instance inst = null;
+//        replaceMissingFilter.input(instance);
+//        replaceMissingFilter.batchFinished();
+//        inst = replaceMissingFilter.output();
+//        System.out.println(inst);
+        Instance inst = instance;
+
+        return clusterProcessedInstance(inst);
     }
 
     private String pad(String source, String padChar, int length, boolean leftPad) {
@@ -248,14 +297,16 @@ public class MyKMeans extends RandomizableClusterer {
         temp.append("\n");
 
         // cluster sizes
-//        String cSize = "(" + Utils.sum(m_ClusterSizes) + ")";
+        String cSize = "(" + Utils.sum(clusterSizes) + ")";
 //        temp.append(pad(cSize, " ", maxAttWidth + maxWidth + 1 - cSize.length(),
 //                true));
-//        for (int i = 0; i < numCluster; i++) {
-//            cSize = "(" + m_ClusterSizes[i] + ")";
-//            temp.append(pad(cSize, " ", maxWidth + 1 - cSize.length(), true));
-//        }
-//        temp.append("\n");
+        temp.append(pad("", " ", maxAttWidth, true));
+
+        for (int i = 0; i < numCluster; i++) {
+            cSize = "(" + clusterSizes[i] + ")";
+            temp.append(pad(cSize, " ", maxWidth + 1 - cSize.length(), true));
+        }
+        temp.append("\n");
         temp.append(pad("", "=",
                 maxAttWidth
                 + (maxWidth * (clusterCentroids.numInstances() + 1)
