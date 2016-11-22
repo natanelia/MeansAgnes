@@ -60,8 +60,8 @@ public class MyAgnes extends AbstractClusterer  {
         distances = new ArrayList<ArrayList<Double>>(); 
     }
     
-    public void mergeCluster(int c1, int c2, int threshold, double distance){
-        clusters.get(c2).setNumThreshold(threshold);
+    public void mergeCluster(int c1, int c2, int level, double distance){
+        clusters.get(c2).setLevel(level);
         clusters.get(c2).setDistance(distance);
         //System.out.println("c2 = " + c2 + " size :" + clusters.size());
         clusters.get(c1).merge(clusters.get(c2));
@@ -87,12 +87,12 @@ public class MyAgnes extends AbstractClusterer  {
         }
         //remove row c2
         distances.remove(c2);
-    }
+     }
 
     @Override
     public void buildClusterer(Instances data) throws Exception {
         instances = data;
-        int threshold = 0;
+        int level = 0;
         int c1 = -1;
         int c2 = -1;
         
@@ -126,11 +126,11 @@ public class MyAgnes extends AbstractClusterer  {
                     }
                     if(min != tempDistance) {
                         tempDistance = min;
-                        threshold++;
+                        level++;
                     } 
                 }
             }
-            mergeCluster(c1, c2, threshold, min);
+            mergeCluster(c1, c2, level, min);
         }
     }
     
@@ -157,7 +157,7 @@ public class MyAgnes extends AbstractClusterer  {
 
     @Override
     public int numberOfClusters() throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return numClusters;
     }
 }
 

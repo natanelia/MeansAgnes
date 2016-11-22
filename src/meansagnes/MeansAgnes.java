@@ -90,7 +90,7 @@ public class MeansAgnes {
         //Classifier model = null;
         switch (type) {
             case 0:
-                model = new MyAgnes();
+                model = new MyAgnes(2, 0);
                 break;
             case 1 :
                 model = new MyKMeans();

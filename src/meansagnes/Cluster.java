@@ -16,22 +16,22 @@ public class Cluster {
     private Instance  instance;
     private ArrayList<Cluster> siblings;
     private int numInstances =1;
-    private int numThreshold;
+    private int level;
     private double distance;
     
     Cluster(Instance i){
         instance = i;
-        numThreshold = 0;
+        level = 0;
         distance = Double.MAX_VALUE;
         siblings = new ArrayList<Cluster>();
     }
     
-    public int getNumThreshold(){
-        return numThreshold;
+    public int getLevel(){
+        return level;
     }
     
-    public void setNumThreshold(int x){
-        numThreshold = x;
+    public void setLevel(int x){
+        level = x;
     }
     
     public double getDistance(){
