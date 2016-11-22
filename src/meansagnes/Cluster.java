@@ -6,7 +6,10 @@
 package meansagnes;
 
 import java.util.ArrayList;
+import weka.core.DistanceFunction;
+import weka.core.EuclideanDistance;
 import weka.core.Instance;
+import weka.core.Instances;
 
 /**
  *
@@ -15,15 +18,21 @@ import weka.core.Instance;
 public class Cluster {
     private Instance  instance;
     private ArrayList<Cluster> siblings;
+    public ArrayList<Instance> instances;
     private int numInstances =1;
     private int level;
     private double distance;
     
+    protected DistanceFunction distanceFunction = new EuclideanDistance();
+    public DistanceFunction getDistanceFunction() {return distanceFunction;}
+    public void setDistanceFunction(DistanceFunction distanceFunction) {this.distanceFunction = distanceFunction;}
     Cluster(Instance i){
         instance = i;
         level = 0;
         distance = Double.MAX_VALUE;
         siblings = new ArrayList<Cluster>();
+        instances = new ArrayList<Instance>();
+        instances.add(i);
     }
     
     public int getLevel(){
@@ -57,6 +66,7 @@ public class Cluster {
     public void merge(Cluster c1){
         siblings.add(c1);
         numInstances += c1.numInstances;
+        instances.addAll(c1.instances);
     }
     
     public String toString(){
@@ -65,6 +75,17 @@ public class Cluster {
         return temp;
     }
     
+    
+//    public void printLevel(Cluster c){
+//        if (c.siblings.size()!=0){
+//            for(int i=0 ; i< c.siblings.size();i++){
+//                printLevel(c.siblings.get(i));
+//                System.out.println(c.siblings.get(i).level);
+//                System.out.println(c.siblings.get(i).distance);
+//            }
+//        }
+//    }
+//    
     public int getNumInstance(Cluster c){
         /*int sum = 0;
         //System.out.println(" size" +c.siblings.size());
