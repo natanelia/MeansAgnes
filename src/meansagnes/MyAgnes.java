@@ -129,6 +129,7 @@ public class MyAgnes extends AbstractClusterer  {
             if(min != tempDistance) {
                 tempDistance = min;
                 level++;
+                //System.out.println("level: " + level +"distance: " + min);
             } 
             mergeCluster(c1, c2, level, min);
         }
@@ -141,11 +142,11 @@ public class MyAgnes extends AbstractClusterer  {
                 "\n" +
                 "Clustered Instances\n\n";
         
-//        for(int i = 0; i < clusters.size(); i++){
-//            temp+= "Cluster " + i + "  " + clusters.get(i).getNumInstance(clusters.get(i)) +"\n";
-//            System.out.println("cluster"+i);
-//            clusters.get(i).printLevel(clusters.get(i));
-//        }
+        for(int i = 0; i < clusters.size(); i++){
+            temp+= "Cluster " + i + "  " + clusters.get(i).getNumInstance(clusters.get(i)) +"\n";
+            //System.out.println("cluster"+i);
+            //clusters.get(i).printLevel(clusters.get(i));
+        }
         return temp;
     }
     @Override

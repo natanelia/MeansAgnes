@@ -25,7 +25,7 @@ import weka.filters.unsupervised.attribute.Remove;
 public class MeansAgnes {
     private Instances data;
     private Clusterer model;
-    private int clusterer;
+    private int clusterer, numCluster = 0, agnesType = 0;
     
     public MeansAgnes(){
         data = null;
@@ -37,6 +37,13 @@ public class MeansAgnes {
         clusterer = i;
     }
     
+    public void setNumCluster(int i){
+        numCluster = i;
+    }
+    
+    public void setAgnesType(int i){
+        agnesType = i;
+    }
     //load data (arrf dan csv)
     public void loadFile(String data_address){
         try {
@@ -90,10 +97,10 @@ public class MeansAgnes {
         //Classifier model = null;
         switch (type) {
             case 0:
-                model = new MyAgnes(2, 0);
+                model = new MyAgnes(numCluster, agnesType);
                 break;
             case 1 :
-                model = new MyKMeans();
+                model = new MyKMeans(numCluster);
                 break;
             default:
                 break;
@@ -229,6 +236,17 @@ public class MeansAgnes {
                 System.out.println("2. K-Means");
                 System.out.print("Masukan pilihan : ");
                 clusterer = scan.nextInt();
+                if(clusterer == 1) {
+                    System.out.println("Type : ");
+                    System.out.println("1. Single");
+                    System.out.println("2. Complete");
+                    System.out.print("Masukan pilihan : ");
+                    int type = scan.nextInt();
+                    w.setAgnesType(type - 1);
+                }
+                System.out.print("Masukan banyak cluster yang diinginkan: ");
+                int nCluster = scan.nextInt();
+                w.setNumCluster(nCluster);
                 w.setClusterer(clusterer - 1);
             }else if(option == 5) {
                 System.out.print("Masukan nilai percentage split : ");

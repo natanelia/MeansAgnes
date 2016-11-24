@@ -38,11 +38,12 @@ public class MyKMeans extends RandomizableClusterer {
     private int[] clusterSizes;
     protected DistanceFunction distanceFunction = new EuclideanDistance();
 
-    public MyKMeans() {
+    public MyKMeans(int nCluster) {
         super();
 
         m_SeedDefault = 10;
         setSeed(m_SeedDefault);
+        numCluster = nCluster;
     }
 
     @Override
